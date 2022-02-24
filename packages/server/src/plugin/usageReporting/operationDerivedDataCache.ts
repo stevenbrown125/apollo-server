@@ -19,6 +19,7 @@ export function createOperationDerivedDataCache({
     length(obj) {
       return Buffer.byteLength(JSON.stringify(obj), 'utf8');
     },
+    max: 100,
     // 10MiB limit, very much approximately since we can't be sure how V8 might
     // be storing this data internally. Though this should be enough to store a
     // fair amount of operation data, depending on their overall complexity. A
@@ -27,7 +28,7 @@ export function createOperationDerivedDataCache({
     // available to the server, and not add more configuration surface area.
     // Hopefully the warning message will allow us to evaluate the need with
     // more validated input from those that receive it.
-    max: Math.pow(2, 20) * 10,
+    maxSize: Math.pow(2, 20) * 10,
     dispose() {
       // Count the number of disposals between warning messages.
       lastDisposals++;

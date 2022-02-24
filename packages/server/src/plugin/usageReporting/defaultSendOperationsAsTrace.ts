@@ -11,6 +11,7 @@ export function defaultSendOperationsAsTrace() {
   // throw away a full minute's worth of cache at once; we keep only the last
   // three minutes
   const cache = new LRUCache<string, true>({
+    max: 100,
     // 3MiB limit, very much approximately since we can't be sure how V8 might
     // be storing these strings internally. Though this should be enough to
     // store a fair amount of trace keys.
@@ -21,7 +22,7 @@ export function defaultSendOperationsAsTrace() {
     // more configuration surface area. Hopefully the warning message will allow
     // us to evaluate the need with more validated input from those that receive
     // it.
-    max: Math.pow(2, 20),
+    maxSize: Math.pow(2, 20),
     length: (_val, key) => {
       return (key && Buffer.byteLength(key)) || 0;
     },

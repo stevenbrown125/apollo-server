@@ -19,8 +19,10 @@ import type {
   Logger,
 } from '@apollo/server-types';
 
-import type { KeyValueCache } from 'apollo-server-caching';
-export type { KeyValueCache };
+import type Keyv from 'keyv';
+
+import type { GraphQLSchemaModule } from '@apollographql/apollo-tools';
+export type { GraphQLSchemaModule };
 
 // A plugin can return an interface that matches `ApolloServerPlugin`, or a
 // factory function that returns `ApolloServerPlugin`.
@@ -66,10 +68,10 @@ export interface GatewayInterface {
 // that older versions of `@apollo/gateway` build against AS3.
 export interface GraphQLService extends GatewayInterface {}
 
-export type DocumentStore = KeyValueCache<DocumentNode>;
+export type DocumentStore = Keyv<DocumentNode> & { getTotalSize(): number };
 
 export interface PersistedQueryOptions {
-  cache?: KeyValueCache;
+  cache?: Keyv<string>;
   /**
    * Specified in **seconds**, this time-to-live (TTL) value limits the lifespan
    * of how long the persisted query should be cached.  To specify a desired
@@ -91,7 +93,7 @@ interface ApolloServerOptionsBase<TContext extends BaseContext> {
     requestContext: GraphQLRequestContext<TContext>,
   ) => GraphQLResponse | null;
   fieldResolver?: GraphQLFieldResolver<any, TContext>;
-  cache?: KeyValueCache;
+  cache?: Keyv<string>;
   includeStackTracesInErrorResponses?: boolean;
   logger?: Logger;
   allowBatchedHttpRequests?: boolean;

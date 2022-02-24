@@ -50,7 +50,7 @@ import type {
 import resolvable, { Resolvable } from '@josephg/resolvable';
 import type { AddressInfo } from 'net';
 import request from 'supertest';
-import { InMemoryLRUCache } from 'apollo-server-caching';
+import { KeyvLRU } from '../../utils/KeyvLRU';
 
 const quietLogger = loglevel.getLogger('quiet');
 quietLogger.setLevel(loglevel.levels.WARN);
@@ -2295,7 +2295,7 @@ export function testApolloServer(
           const { url: uri } = await createApolloServer({
             gateway,
             documentStore: withDocumentStore
-              ? new InMemoryLRUCache<DocumentNode>()
+              ? new KeyvLRU<DocumentNode>()
               : undefined,
           });
 

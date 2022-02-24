@@ -1,9 +1,10 @@
 import gql from 'graphql-tag';
-import type { DocumentNode } from 'graphql';
-
 import { ApolloServer } from '../ApolloServer';
-import { InMemoryLRUCache } from 'apollo-server-caching';
 import type { BaseContext } from '@apollo/server-types';
+import { KeyvLRU } from '../utils/KeyvLRU';
+import Keyv from 'keyv';
+import type { DocumentNode } from 'graphql';
+import assert from 'assert';
 
 const typeDefs = gql`
   type Query {
@@ -28,10 +29,11 @@ const documentNodeMatcher = {
   },
 };
 
+const hash = 'ec2e01311ab3b02f3d8c8c712f9e579356d332cd007ac4c1ea5df727f482f05f';
 const operations = {
   simple: {
     op: { query: 'query { hello }' },
-    hash: 'ec2e01311ab3b02f3d8c8c712f9e579356d332cd007ac4c1ea5df727f482f05f',
+    hash,
   },
 };
 
@@ -45,31 +47,22 @@ describe('ApolloServer documentStore', () => {
     await server.start();
 
     // Use [] syntax to access a private method.
-    const { documentStore } = (
-      await server['_ensureStarted']()
-    ).schemaManager.getSchemaDerivedData();
-    expect(documentStore).toBeInstanceOf(InMemoryLRUCache);
-    const embeddedStore = documentStore as InMemoryLRUCache<DocumentNode>;
+    const { schemaManager } = await server['_ensureStarted']();
+    const { documentStore } = schemaManager.getSchemaDerivedData();
+    assert(documentStore);
+    expect(documentStore).toBeInstanceOf(Keyv);
 
     await server.executeOperation(operations.simple.op);
 
-    expect(await embeddedStore.getTotalSize()).toBe(403);
-    expect(await embeddedStore.get(operations.simple.hash)).toMatchObject(
+    expect(documentStore.getTotalSize()).toBe(508);
+
+    expect(await documentStore.get(operations.simple.hash)).toMatchObject(
       documentNodeMatcher,
     );
   });
 
   it('documentStore - custom', async () => {
-    const documentStore = {
-      get: async function (key: string) {
-        return cache[key];
-      },
-      set: async function (key: string, val: DocumentNode) {
-        cache[key] = val;
-      },
-      delete: async function () {},
-    };
-    const cache: Record<string, DocumentNode> = {};
+    const documentStore = new KeyvLRU<DocumentNode>();
 
     const getSpy = jest.spyOn(documentStore, 'get');
     const setSpy = jest.spyOn(documentStore, 'set');
@@ -83,6 +76,9 @@ describe('ApolloServer documentStore', () => {
 
     await server.executeOperation(operations.simple.op);
 
+    const cache: Record<string, DocumentNode | undefined> = {};
+    cache[hash] = await documentStore.get(hash);
+
     const keys = Object.keys(cache);
     expect(keys).toHaveLength(1);
     const theKey = keys[0];
@@ -94,7 +90,8 @@ describe('ApolloServer documentStore', () => {
 
     expect(Object.keys(cache)).toEqual([theKey]);
 
-    expect(getSpy.mock.calls.length).toBe(2);
+    // one of these calls is ours
+    expect(getSpy.mock.calls.length).toBe(2 + 1);
     expect(setSpy.mock.calls.length).toBe(1);
   });
 

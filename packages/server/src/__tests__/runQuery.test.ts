@@ -20,7 +20,7 @@ import type {
   GraphQLRequestListenerValidationDidEnd,
   BaseContext,
 } from '@apollo/server-types';
-import { InMemoryLRUCache } from 'apollo-server-caching';
+import { KeyvLRU, LRU } from '../utils/KeyvLRU';
 import type { ApolloServerOptions } from '../types';
 import { ApolloServer } from '../ApolloServer';
 
@@ -1059,7 +1059,7 @@ describe('parsing and validation cache', () => {
       events: { parsingDidStart, validationDidStart },
     } = createLifecyclePluginMocks();
 
-    const queryLarge = forgeLargerTestQuery(3, 'large');
+    const queryLarge = forgeLargerTestQuery(2, 'large');
     const querySmall1 = forgeLargerTestQuery(1, 'small1');
     const querySmall2 = forgeLargerTestQuery(1, 'small2');
 
@@ -1067,13 +1067,18 @@ describe('parsing and validation cache', () => {
     // size of the two smaller queries.  All three of these queries will never
     // fit into this cache, so we'll roll through them all.
     const maxSize =
-      InMemoryLRUCache.jsonBytesSizeCalculator(parse(querySmall1)) +
-      InMemoryLRUCache.jsonBytesSizeCalculator(parse(querySmall2));
+      LRU.jsonBytesSizeCalculator(parse(querySmall1)) +
+      LRU.jsonBytesSizeCalculator(parse(querySmall2));
 
-    const documentStore = new InMemoryLRUCache<DocumentNode>({
-      maxSize,
-      sizeCalculator: InMemoryLRUCache.jsonBytesSizeCalculator,
-    });
+      const documentStore = new KeyvLRU<DocumentNode>({
+        store: new LRU<DocumentNode>({
+          max: 100,
+          maxSize,
+          length(obj) {
+            return LRU.jsonBytesSizeCalculator(obj);
+          },
+        }),
+      });
 
     const server = new ApolloServer<BaseContext>({
       schema,

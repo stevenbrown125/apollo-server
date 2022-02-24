@@ -9,15 +9,8 @@ import type {
   GraphQLResolveInfo,
   GraphQLCompositeType,
 } from 'graphql';
-
 // TODO(AS4): Audit entire package for appropriateness of exports
-// TODO(AS4): Consider merging back in to `@apollo/server`. The motivation
-//   for a separate package is so that packages implementing plugins (and
-//   @apollo/gateway) don't need to have a dep on `@apollo/server` but maybe
-//   a peer dep would be appropriate for these.
-
-// This seems like it could live in this package too.
-import type { KeyValueCache } from 'apollo-server-caching';
+import type Keyv from 'keyv';
 import type { Trace } from '@apollo/usage-reporting-protobuf';
 
 // TODO(AS4): Document this interface.
@@ -174,8 +167,8 @@ export interface GraphQLRequestContext<TContext = Record<string, any>> {
 
   readonly schema: GraphQLSchema;
 
-  readonly contextValue: TContext;
-  readonly cache: KeyValueCache;
+  readonly context: TContext;
+  readonly cache: Keyv;
 
   readonly queryHash?: string;
 
