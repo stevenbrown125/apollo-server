@@ -1070,15 +1070,15 @@ describe('parsing and validation cache', () => {
       LRU.jsonBytesSizeCalculator(parse(querySmall1)) +
       LRU.jsonBytesSizeCalculator(parse(querySmall2));
 
-      const documentStore = new KeyvLRU<DocumentNode>({
-        store: new LRU<DocumentNode>({
-          max: 100,
-          maxSize,
-          length(obj) {
-            return LRU.jsonBytesSizeCalculator(obj);
-          },
-        }),
-      });
+    const documentStore = new KeyvLRU<DocumentNode>({
+      store: new LRU<DocumentNode>({
+        max: 100,
+        maxSize,
+        length(obj) {
+          return LRU.jsonBytesSizeCalculator(obj);
+        },
+      }),
+    });
 
     const server = new ApolloServer<BaseContext>({
       schema,
