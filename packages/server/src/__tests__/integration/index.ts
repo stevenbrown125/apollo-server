@@ -1414,10 +1414,6 @@ export default ({
         },
       };
 
-      function createMockCache(): Keyv<string> {
-        return new Keyv({ namespace: 'apq' });
-      }
-
       let didEncounterErrors: jest.MockedFunction<
         NonNullable<GraphQLRequestListener<BaseContext>['didEncounterErrors']>
       >;
@@ -1454,7 +1450,7 @@ export default ({
       let setSpy: jest.SpyInstance;
 
       beforeEach(async () => {
-        cache = createMockCache();
+        cache = new Keyv();
         setSpy = jest.spyOn(cache, 'set');
 
         didResolveSource = jest.fn();

@@ -15,6 +15,8 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import resolvable, { Resolvable } from '@josephg/resolvable';
+import { KeyvLRU, PrefixingKeyv } from './utils/KeyvLRU';
+import type Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
   GraphQLServiceContext,
@@ -68,8 +70,6 @@ import {
 } from './runHttpQuery';
 import { runPotentiallyBatchedHttpQuery } from './httpBatching';
 import { formatApolloErrors } from './errors';
-import { KeyvLRU, PrefixingKeyv } from './utils/KeyvLRU';
-import type Keyv from 'keyv';
 
 const NoIntrospection = (context: ValidationContext) => ({
   Field(node: FieldDefinitionNode) {
@@ -154,7 +154,7 @@ export interface ApolloServerInternals<TContext> {
   ) => GraphQLResponse | null;
   fieldResolver?: GraphQLFieldResolver<any, TContext>;
   includeStackTracesInErrorResponses: boolean;
-  cache: Keyv;
+  cache: Keyv<string>;
   persistedQueries?: WithRequired<PersistedQueryOptions, 'cache'>;
   nodeEnv: string;
   allowBatchedHttpRequests: boolean;

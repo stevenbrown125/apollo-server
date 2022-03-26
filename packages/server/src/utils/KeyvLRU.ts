@@ -37,6 +37,14 @@ export class LRU<T> implements Store<T> {
     this.cache.clear();
   }
 
+  keys() {
+    const keys = [];
+    for (const key of this.cache.keys()) {
+      keys.push(key);
+    }
+    return keys;
+  }
+
   sizeCalculation() {
     return this.cache.calculatedSize;
   }
@@ -68,6 +76,7 @@ export class KeyvLRU<T> extends Keyv<T> {
     throw Error('`Keyv.store` does not implement `sizeCalculation()`');
   }
 }
+
 export class PrefixingKeyv<K> extends Keyv<K> {
   constructor(private wrapped: Keyv<K>, private prefix: string) {
     super();

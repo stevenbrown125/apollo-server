@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
-import { ApolloServer } from '../ApolloServer';
-import type { BaseContext } from '@apollo/server-types';
-import { KeyvLRU } from '../utils/KeyvLRU';
-import Keyv from 'keyv';
 import type { DocumentNode } from 'graphql';
+import { ApolloServer } from '../ApolloServer';
+import { KeyvLRU, LRU } from '../utils/KeyvLRU';
+import Keyv from 'keyv';
+import type { BaseContext } from '@apollo/server-types';
 import assert from 'assert';
 
 const typeDefs = gql`
@@ -75,20 +75,20 @@ describe('ApolloServer documentStore', () => {
     await server.start();
 
     await server.executeOperation(operations.simple.op);
+    const store = documentStore.opts.store;
+    const keys = (store as LRU<DocumentNode>).keys();
 
-    const cache: Record<string, DocumentNode | undefined> = {};
-    cache[hash] = await documentStore.get(hash);
-
-    const keys = Object.keys(cache);
     expect(keys).toHaveLength(1);
     const theKey = keys[0];
-    expect(theKey.split(':')).toHaveLength(2);
-    expect(theKey.split(':')[1]).toEqual(operations.simple.hash);
-    expect(cache[theKey]).toMatchObject(documentNodeMatcher);
+    const [namespace, uuid, hash] = theKey.split(':');
+    expect(namespace).toBe('apollo');
+    expect(typeof uuid).toBe('string');
+    expect(hash).toEqual(operations.simple.hash);
+
+    const result = await documentStore.get(`${uuid}:${hash}`);
+    expect(result).toMatchObject(documentNodeMatcher);
 
     await server.executeOperation(operations.simple.op);
-
-    expect(Object.keys(cache)).toEqual([theKey]);
 
     // one of these calls is ours
     expect(getSpy.mock.calls.length).toBe(2 + 1);
