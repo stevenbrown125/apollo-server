@@ -1,3 +1,8 @@
+// TODO(AS4): Audit entire package for appropriateness of exports
+// TODO(AS4): Consider merging back in to `@apollo/server`. The motivation
+//   for a separate package is so that packages implementing plugins (and
+//   @apollo/gateway) don't need to have a dep on `@apollo/server` but maybe
+//   a peer dep would be appropriate for these.
 import type {
   GraphQLSchema,
   ValidationContext,
@@ -9,7 +14,6 @@ import type {
   GraphQLResolveInfo,
   GraphQLCompositeType,
 } from 'graphql';
-// TODO(AS4): Audit entire package for appropriateness of exports
 import type Keyv from 'keyv';
 import type { Trace } from '@apollo/usage-reporting-protobuf';
 
