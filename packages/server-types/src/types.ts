@@ -167,7 +167,7 @@ export interface GraphQLRequestContext<TContext = Record<string, any>> {
 
   readonly schema: GraphQLSchema;
 
-  readonly context: TContext;
+  readonly contextValue: TContext;
   readonly cache: Keyv<string>;
 
   readonly queryHash?: string;
