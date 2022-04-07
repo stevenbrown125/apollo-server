@@ -21,9 +21,6 @@ import type {
 
 import type Keyv from 'keyv';
 
-import type { GraphQLSchemaModule } from '@apollographql/apollo-tools';
-export type { GraphQLSchemaModule };
-
 // A plugin can return an interface that matches `ApolloServerPlugin`, or a
 // factory function that returns `ApolloServerPlugin`.
 export type PluginDefinition<TContext extends BaseContext> =
