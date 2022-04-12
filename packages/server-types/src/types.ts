@@ -16,6 +16,7 @@ import type {
 } from 'graphql';
 import type Keyv from 'keyv';
 import type { Trace } from '@apollo/usage-reporting-protobuf';
+import type { Logger } from '@apollo/utils.logger';
 
 // TODO(AS4): Document this interface.
 export interface HTTPGraphQLRequest {
@@ -61,7 +62,7 @@ export type HTTPGraphQLResponse = {
     }
 );
 
-export type BaseContext = Record<string, any>;
+export type BaseContext = {};
 
 export type WithRequired<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
@@ -212,14 +213,6 @@ export type GraphQLExecutionResult = {
   data?: Record<string, any> | null;
   errors?: ReadonlyArray<GraphQLError>;
   extensions?: Record<string, any>;
-};
-
-export type Logger = {
-  // Ordered from least-severe to most-severe.
-  debug(message?: any): void;
-  info(message?: any): void;
-  warn(message?: any): void;
-  error(message?: any): void;
 };
 
 /**

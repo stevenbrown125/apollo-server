@@ -27,7 +27,6 @@ import type {
   GraphQLServiceContext,
   GraphQLServerListener,
   LandingPage,
-  Logger,
   ApolloConfig,
   BaseContext,
   GraphQLResponse,
@@ -36,6 +35,7 @@ import type {
   HTTPGraphQLResponse,
   WithRequired,
 } from '@apollo/server-types';
+import type { Logger } from '@apollo/utils.logger';
 
 import type {
   ApolloServerOptions,
@@ -146,7 +146,7 @@ class UnreachableCaseError extends Error {
 
 // TODO(AS4): Move this to its own file or something. Also organize the fields.
 
-export interface ApolloServerInternals<TContext> {
+export interface ApolloServerInternals<TContext extends BaseContext> {
   formatError?: (error: GraphQLError) => GraphQLFormattedError;
   // TODO(AS4): Is there a way (with generics/codegen?) to make
   // this "any" more specific? In AS3 there was technically a
@@ -208,6 +208,8 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
   // once `out TContext` is available. Note that when we replace this with `out
   // TContext`, we may make it so that users of older TypeScript versions no
   // longer have this protection.
+  //
+  // TODO(AS4): upgrade to TS 4.7 when it is released and use that instead.
   protected __forceTContextToBeContravariant?: (contextValue: TContext) => void;
 
   constructor(config: ApolloServerOptions<TContext>) {
@@ -638,7 +640,7 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
     );
   }
 
-  private static constructSchema<TContext>(
+  private static constructSchema<TContext extends BaseContext>(
     config: ApolloServerOptionsWithStaticSchema<TContext>,
   ): GraphQLSchema {
     if (config.schema) {
@@ -661,7 +663,7 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
     });
   }
 
-  private static maybeAddMocksToConstructedSchema<TContext>(
+  private static maybeAddMocksToConstructedSchema<TContext extends BaseContext>(
     schema: GraphQLSchema,
     config: ApolloServerOptionsWithStaticSchema<TContext>,
   ): GraphQLSchema {
@@ -820,7 +822,7 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
   // This is called in the constructor before this.internals has been
   // initialized, so we make it static to make it clear it can't assume that
   // `this` has been fully initialized.
-  private static ensurePluginInstantiation<TContext>(
+  private static ensurePluginInstantiation<TContext extends BaseContext>(
     userPlugins: PluginDefinition<TContext>[] = [],
     isDev: boolean,
     apolloConfig: ApolloConfig,
@@ -1145,7 +1147,7 @@ export type ImplicitlyInstallablePlugin<TContext extends BaseContext> =
     __internal_installed_implicitly__: boolean;
   };
 
-export function isImplicitlyInstallablePlugin<TContext>(
+export function isImplicitlyInstallablePlugin<TContext extends BaseContext>(
   p: ApolloServerPlugin<TContext>,
 ): p is ImplicitlyInstallablePlugin<TContext> {
   return '__internal_installed_implicitly__' in p;
