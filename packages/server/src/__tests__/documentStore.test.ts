@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import type { DocumentNode } from 'graphql';
 import { ApolloServer } from '../ApolloServer';
-import { KeyvLRU, LRUStore } from '../utils/KeyvLRU';
+import { KeyvLRU } from '../utils/KeyvLRU';
 import Keyv from 'keyv';
 import assert from 'assert';
 
@@ -74,8 +74,7 @@ describe('ApolloServer documentStore', () => {
     await server.start();
 
     await server.executeOperation(operations.simple.op);
-    const store = documentStore.opts.store;
-    const keys = (store as LRUStore<DocumentNode>).keys();
+    const keys = documentStore.opts.store.keys();
 
     expect(keys).toHaveLength(1);
     const theKey = keys[0];
