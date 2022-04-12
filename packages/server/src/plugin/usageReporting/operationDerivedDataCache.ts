@@ -19,7 +19,6 @@ export function createOperationDerivedDataCache({
     length(obj) {
       return Buffer.byteLength(JSON.stringify(obj), 'utf8');
     },
-    max: 100,
     // 10MiB limit, very much approximately since we can't be sure how V8 might
     // be storing this data internally. Though this should be enough to store a
     // fair amount of operation data, depending on their overall complexity. A

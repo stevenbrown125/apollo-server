@@ -1072,7 +1072,6 @@ describe('parsing and validation cache', () => {
 
     const documentStore = new KeyvLRU<DocumentNode>({
       store: new LRUStore<DocumentNode>({
-        max: 100,
         maxSize,
         length(obj) {
           return LRUStore.jsonBytesSizeCalculator(obj);
