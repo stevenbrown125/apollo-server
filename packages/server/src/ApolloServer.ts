@@ -15,7 +15,7 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import resolvable, { Resolvable } from '@josephg/resolvable';
-import { KeyvLRU, PrefixingKeyv } from './utils/KeyvLRU';
+import { KeyvLRU, LRUStore, PrefixingKeyv } from './utils/KeyvLRU';
 import type Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
@@ -703,7 +703,21 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
       // random prefix each time we get a new schema.
       documentStore:
         providedUnprefixedDocumentStore === undefined
-          ? new KeyvLRU()
+          ? // Create ~about~ a 30MiB KeyvLRU.  This is less than precise
+            // since the technique to calculate the size of a DocumentNode is
+            // only using JSON.stringify on the DocumentNode (and thus doesn't account
+            // for unicode characters, etc.), but it should do a reasonable job at
+            // providing a caching document store for most operations.
+            //
+            // If you want to tweak the max size, pass in your own documentStore.
+            new KeyvLRU<DocumentNode>({
+              store: new LRUStore({
+                maxSize: Math.pow(2, 20) * 30,
+                sizeCalculation(value) {
+                  return LRUStore.jsonBytesSizeCalculator(value);
+                },
+              }),
+            })
           : providedUnprefixedDocumentStore === null
           ? null
           : new PrefixingKeyv(providedUnprefixedDocumentStore, `${uuid.v4()}:`),

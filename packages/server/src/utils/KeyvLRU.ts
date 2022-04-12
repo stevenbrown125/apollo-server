@@ -1,23 +1,12 @@
-// Create ~about~ a 30MiB LRU. This is less than precise
-// since the technique to calculate the size of a DocumentNode is
-// only using JSON.stringify on the DocumentNode (and thus doesn't account
-// for unicode characters, etc.), but it should do a reasonable job at
-// providing a caching document store for most operations.
-
 import LRUCache from 'lru-cache';
 import Keyv, { Store, type Options } from 'keyv';
 
 // LRUCache wrapper to implement the Keyv `Store` interface.
-export class LRU<T> implements Store<T> {
+export class LRUStore<T> implements Store<T> {
   private cache: LRUCache<string, T>;
 
   constructor(lruCacheOpts: LRUCache.Options<string, T>) {
-    this.cache = new LRUCache({
-      sizeCalculation(value) {
-        return LRU.jsonBytesSizeCalculator(value);
-      },
-      ...lruCacheOpts,
-    });
+    this.cache = new LRUCache(lruCacheOpts);
   }
 
   set(key: string, value: T, ttl?: number) {
@@ -54,13 +43,17 @@ export class LRU<T> implements Store<T> {
   }
 }
 
-export class KeyvLRU<T> extends Keyv<T> {
+export class KeyvLRU<T> extends Keyv<T, { maxSize?: number }> {
   constructor(opts?: Options<T>) {
     super({
       namespace: 'apollo',
-      store: new LRU<T>({
-        max: 100,
-        maxSize: Math.pow(2, 20) * 30,
+      store: new LRUStore<T>({
+        // FIXME: @glasser this was previously Infinity but no longer allowed,
+        // do you propose something else here? I'm unsure about a sane default.
+        maxSize: 999999999,
+        sizeCalculation(obj) {
+          return LRUStore.jsonBytesSizeCalculator(obj);
+        }
       }),
       ...opts,
     });
