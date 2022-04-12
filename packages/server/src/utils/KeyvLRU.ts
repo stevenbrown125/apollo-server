@@ -33,14 +33,10 @@ export class LRUStore<T> implements Store<T> {
     }
     return keys;
   }
-
-  sizeCalculation() {
-    return this.cache.calculatedSize;
-  }
 }
 
-export class KeyvLRU<T> extends Keyv<T, { store?: LRUStore<T> }> {
-  constructor(opts?: Options<T> & { store?: LRUStore<T> }) {
+export class KeyvLRU<T> extends Keyv<T, { store: LRUStore<T> }> {
+  constructor(opts?: Options<T> & { store: LRUStore<T> }) {
     super({
       namespace: 'apollo',
       store: new LRUStore<T>({
@@ -54,18 +50,17 @@ export class KeyvLRU<T> extends Keyv<T, { store?: LRUStore<T> }> {
       ...opts,
     });
   }
-
-  getTotalSize() {
-    return this.opts.store.sizeCalculation();
-  }
 }
 
 // This class allows us to take an existing Keyv cache and "wrap" its incoming
 // keys with a prefix. Currently, a Keyv can only be used with a single
 // namespace but one might suppose an addition to the set/get API which allows
 // for multiple namespaces within a single Keyv cache.
-export class PrefixingKeyv<K> extends Keyv<K> {
-  constructor(private wrapped: Keyv<K>, private prefix: string) {
+export class PrefixingKeyv<T, Opts = Record<string, any>> extends Keyv<
+  T,
+  Opts
+> {
+  constructor(private wrapped: Keyv<T>, private prefix: string) {
     super();
   }
 
@@ -76,22 +71,12 @@ export class PrefixingKeyv<K> extends Keyv<K> {
     return this.wrapped.get(this.prefix + key, opts);
   }
 
-  override set(key: string, value: K, ttl?: number) {
+  override set(key: string, value: T, ttl?: number) {
     return this.wrapped.set(this.prefix + key, value, ttl);
   }
 
   override delete(key: string) {
     return this.wrapped.delete(this.prefix + key);
-  }
-
-  getTotalSize() {
-    if ('getTotalSize' in this.wrapped) {
-      return (this.wrapped as Keyv & { getTotalSize(): number }).getTotalSize();
-    }
-    // TODO: probably don't throw here
-    throw Error(
-      '`PrefixingKeyv`s wrapped Keyv does not implement `sizeCalculation()`',
-    );
   }
 }
 

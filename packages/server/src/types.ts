@@ -20,6 +20,7 @@ import type {
 } from '@apollo/server-types';
 
 import type Keyv from 'keyv';
+import type { LRUStore } from './utils/KeyvLRU';
 
 // A plugin can return an interface that matches `ApolloServerPlugin`, or a
 // factory function that returns `ApolloServerPlugin`.
@@ -65,7 +66,10 @@ export interface GatewayInterface {
 // that older versions of `@apollo/gateway` build against AS3.
 export interface GraphQLService extends GatewayInterface {}
 
-export type DocumentStore = Keyv<DocumentNode> & { getTotalSize(): number };
+export type DocumentStore = Keyv<
+  DocumentNode,
+  { store: LRUStore<DocumentNode> }
+>;
 
 export interface PersistedQueryOptions {
   cache?: Keyv<string>;

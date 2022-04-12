@@ -54,7 +54,7 @@ describe('ApolloServer documentStore', () => {
 
     await server.executeOperation(operations.simple.op);
 
-    expect(documentStore.getTotalSize()).toBe(508);
+    expect(documentStore.opts.store['cache'].calculatedSize).toBe(508);
 
     expect(await documentStore.get(operations.simple.hash)).toMatchObject(
       documentNodeMatcher,
