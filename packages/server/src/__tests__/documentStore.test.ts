@@ -3,7 +3,6 @@ import type { DocumentNode } from 'graphql';
 import { ApolloServer } from '../ApolloServer';
 import { KeyvLRU, LRUStore } from '../utils/KeyvLRU';
 import Keyv from 'keyv';
-import type { BaseContext } from '@apollo/server-types';
 import assert from 'assert';
 
 const typeDefs = gql`

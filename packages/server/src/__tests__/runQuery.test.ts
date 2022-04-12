@@ -1063,7 +1063,6 @@ describe('parsing and validation cache', () => {
     const querySmall1 = forgeLargerTestQuery(1, 'small1');
     const querySmall2 = forgeLargerTestQuery(1, 'small2');
 
-
     // The (stringified) objects returned by this function represent how they're
     // stored in the cache and the form they're in when having size calculations
     // performed on them.
@@ -1083,7 +1082,7 @@ describe('parsing and validation cache', () => {
         maxSize,
         sizeCalculation(obj) {
           return jsonBytesSizeCalculator(obj);
-        }
+        },
       }),
     });
 

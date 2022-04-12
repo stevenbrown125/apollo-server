@@ -15,7 +15,12 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import resolvable, { Resolvable } from '@josephg/resolvable';
-import { jsonBytesSizeCalculator, KeyvLRU, LRUStore, PrefixingKeyv } from './utils/KeyvLRU';
+import {
+  jsonBytesSizeCalculator,
+  KeyvLRU,
+  LRUStore,
+  PrefixingKeyv,
+} from './utils/KeyvLRU';
 import type Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
