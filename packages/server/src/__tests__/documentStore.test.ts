@@ -39,7 +39,7 @@ const operations = {
 
 describe('ApolloServer documentStore', () => {
   it('documentStore - undefined', async () => {
-    const server = new ApolloServer<BaseContext>({
+    const server = new ApolloServer({
       typeDefs,
       resolvers,
     });
@@ -96,7 +96,7 @@ describe('ApolloServer documentStore', () => {
   });
 
   it('documentStore - null', async () => {
-    const server = new ApolloServer<BaseContext>({
+    const server = new ApolloServer({
       typeDefs,
       resolvers,
       documentStore: null,
