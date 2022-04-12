@@ -39,8 +39,8 @@ export class LRUStore<T> implements Store<T> {
   }
 }
 
-export class KeyvLRU<T> extends Keyv<T, { maxSize?: number }> {
-  constructor(opts?: Options<T>) {
+export class KeyvLRU<T> extends Keyv<T, { store?: LRUStore<T> }> {
+  constructor(opts?: Options<T> & { store?: LRUStore<T> }) {
     super({
       namespace: 'apollo',
       store: new LRUStore<T>({
@@ -49,20 +49,14 @@ export class KeyvLRU<T> extends Keyv<T, { maxSize?: number }> {
         maxSize: 999999999,
         sizeCalculation(obj) {
           return jsonBytesSizeCalculator(obj);
-        }
+        },
       }),
       ...opts,
     });
   }
 
   getTotalSize() {
-    if ('sizeCalculation' in this.opts.store) {
-      return (
-        this.opts.store as Store<T> & { sizeCalculation: () => number }
-      ).sizeCalculation();
-    }
-    // TODO: probably don't throw here
-    throw Error('`Keyv.store` does not implement `sizeCalculation()`');
+    return this.opts.store.sizeCalculation();
   }
 }
 
