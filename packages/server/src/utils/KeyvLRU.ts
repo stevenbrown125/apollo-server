@@ -37,10 +37,6 @@ export class LRUStore<T> implements Store<T> {
   sizeCalculation() {
     return this.cache.calculatedSize;
   }
-
-  static jsonBytesSizeCalculator<T>(obj: T) {
-    return Buffer.byteLength(JSON.stringify(obj), 'utf8');
-  }
 }
 
 export class KeyvLRU<T> extends Keyv<T, { maxSize?: number }> {
@@ -52,7 +48,7 @@ export class KeyvLRU<T> extends Keyv<T, { maxSize?: number }> {
         // do you propose something else here? I'm unsure about a sane default.
         maxSize: 999999999,
         sizeCalculation(obj) {
-          return LRUStore.jsonBytesSizeCalculator(obj);
+          return jsonBytesSizeCalculator(obj);
         }
       }),
       ...opts,
@@ -99,4 +95,8 @@ export class PrefixingKeyv<K> extends Keyv<K> {
       '`PrefixingKeyv`s wrapped Keyv does not implement `sizeCalculation()`',
     );
   }
+}
+
+export function jsonBytesSizeCalculator<T>(obj: T) {
+  return Buffer.byteLength(JSON.stringify(obj), 'utf8');
 }

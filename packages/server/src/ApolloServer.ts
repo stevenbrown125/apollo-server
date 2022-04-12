@@ -15,7 +15,7 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import resolvable, { Resolvable } from '@josephg/resolvable';
-import { KeyvLRU, LRUStore, PrefixingKeyv } from './utils/KeyvLRU';
+import { jsonBytesSizeCalculator, KeyvLRU, LRUStore, PrefixingKeyv } from './utils/KeyvLRU';
 import type Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
@@ -714,7 +714,7 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
               store: new LRUStore({
                 maxSize: Math.pow(2, 20) * 30,
                 sizeCalculation(value) {
-                  return LRUStore.jsonBytesSizeCalculator(value);
+                  return jsonBytesSizeCalculator(value);
                 },
               }),
             })
