@@ -15,12 +15,12 @@ import type {
   GraphQLServerListener,
 } from '@apollo/server-types';
 import type { Logger } from '@apollo/utils.logger';
-import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql/type';
+import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
+import Keyv from 'keyv';
 import {
   enablePluginsForSchemaResolvers,
   symbolExecutionDispatcherWillResolveField,
 } from '../utils/schemaInstrumentation';
-import { KeyvLRU } from '../utils/KeyvLRU';
 import { Dispatcher } from '../utils/dispatcher';
 import { getOperationAST, parse, validate as graphqlValidate } from 'graphql';
 import { newCachePolicy } from '../cachePolicy';
@@ -124,7 +124,7 @@ export default async function pluginTestHarness<TContext>({
     request: graphqlRequest,
     metrics: Object.create(null),
     source: graphqlRequest.query,
-    cache: new KeyvLRU<string>(),
+    cache: new Keyv<string>(),
     contextValue,
     overallCachePolicy: newCachePolicy(),
   };

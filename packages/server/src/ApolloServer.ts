@@ -15,12 +15,7 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import resolvable, { Resolvable } from '@josephg/resolvable';
-import {
-  jsonBytesSizeCalculator,
-  KeyvLRU,
-  LRUStore,
-  PrefixingKeyv,
-} from './utils/KeyvLRU';
+import { LRUStore, PrefixingKeyv } from './utils/KeyvLRU';
 import Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
@@ -275,7 +270,7 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
     // default for its underlying store. For production, we recommend using a
     // more appropriate Keyv implementation (see
     // https://github.com/jaredwray/keyv/tree/main/packages for 1st party
-    // maintained Keyv packages or our own `KeyvLRU`).
+    // maintained Keyv packages or our own Keyv store `LRUStore`).
     // TODO(AS4): warn users and provide better documentation around providing
     // an appropriate Keyv.
     const cache = config.cache ?? new Keyv();
@@ -718,19 +713,11 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
       // random prefix each time we get a new schema.
       documentStore:
         providedUnprefixedDocumentStore === undefined
-          ? // Create ~about~ a 30MiB KeyvLRU.  This is less than precise
-            // since the technique to calculate the size of a DocumentNode is
-            // only using JSON.stringify on the DocumentNode (and thus doesn't account
-            // for unicode characters, etc.), but it should do a reasonable job at
-            // providing a caching document store for most operations.
-            //
-            // If you want to tweak the max size, pass in your own documentStore.
-            new KeyvLRU<DocumentNode>({
+          ? new Keyv<DocumentNode>({
               store: new LRUStore({
+                // Create ~about~ a 30MiB cache by default. Configurable by providing
+                // your own `documentStore`.
                 maxSize: Math.pow(2, 20) * 30,
-                sizeCalculation(value) {
-                  return jsonBytesSizeCalculator(value);
-                },
               }),
             })
           : providedUnprefixedDocumentStore === null

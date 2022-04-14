@@ -20,7 +20,8 @@ import type {
   GraphQLRequestListenerValidationDidEnd,
   BaseContext,
 } from '@apollo/server-types';
-import { jsonBytesSizeCalculator, KeyvLRU, LRUStore } from '../utils/KeyvLRU';
+import Keyv from 'keyv';
+import { LRUStore, sizeCalculation } from '../utils/KeyvLRU';
 import type { ApolloServerOptions } from '../types';
 import { ApolloServer } from '../ApolloServer';
 
@@ -1074,15 +1075,13 @@ describe('parsing and validation cache', () => {
     // of the two smaller queries. All three of these queries will never fit
     // into this cache, so we'll roll through them all.
     const maxSize =
-      jsonBytesSizeCalculator(cacheRepresentationOfQuery(querySmall1)) +
-      jsonBytesSizeCalculator(cacheRepresentationOfQuery(querySmall2));
+      // sizeCalculation is the same calculator that `LRUStore` uses by default.
+      sizeCalculation(cacheRepresentationOfQuery(querySmall1)) +
+      sizeCalculation(cacheRepresentationOfQuery(querySmall2));
 
-    const documentStore = new KeyvLRU<DocumentNode>({
+    const documentStore = new Keyv<DocumentNode>({
       store: new LRUStore<DocumentNode>({
         maxSize,
-        sizeCalculation(obj) {
-          return jsonBytesSizeCalculator(obj);
-        },
       }),
     });
 

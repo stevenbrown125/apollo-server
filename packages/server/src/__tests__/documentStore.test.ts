@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import type { DocumentNode } from 'graphql';
 import { ApolloServer } from '../ApolloServer';
-import { KeyvLRU } from '../utils/KeyvLRU';
+import { LRUStore } from '../utils/KeyvLRU';
 import Keyv from 'keyv';
 import assert from 'assert';
 
@@ -53,7 +53,10 @@ describe('ApolloServer documentStore', () => {
 
     await server.executeOperation(operations.simple.op);
 
-    expect(documentStore.opts.store['cache'].calculatedSize).toBe(508);
+    expect(
+      (documentStore.opts.store as LRUStore<DocumentNode>)['cache']
+        .calculatedSize,
+    ).toBe(428);
 
     expect(await documentStore.get(operations.simple.hash)).toMatchObject(
       documentNodeMatcher,
@@ -61,7 +64,13 @@ describe('ApolloServer documentStore', () => {
   });
 
   it('documentStore - custom', async () => {
-    const documentStore = new KeyvLRU<DocumentNode>();
+    const documentStore = new Keyv<
+      DocumentNode,
+      { store: LRUStore<DocumentNode> }
+    >({
+      namespace: 'custom',
+      store: new LRUStore<DocumentNode>({ maxSize: 2000 }),
+    });
 
     const getSpy = jest.spyOn(documentStore, 'get');
     const setSpy = jest.spyOn(documentStore, 'set');
@@ -79,7 +88,7 @@ describe('ApolloServer documentStore', () => {
     expect(keys).toHaveLength(1);
     const theKey = keys[0];
     const [namespace, uuid, hash] = theKey.split(':');
-    expect(namespace).toBe('apollo');
+    expect(namespace).toBe('custom');
     expect(typeof uuid).toBe('string');
     expect(hash).toEqual(operations.simple.hash);
 

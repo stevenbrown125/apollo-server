@@ -1,5 +1,5 @@
 import LRUCache from 'lru-cache';
-import Keyv, { Store, type Options } from 'keyv';
+import Keyv, { Store } from 'keyv';
 
 // LRUCache wrapper to implement the Keyv `Store` interface.
 export class LRUStore<T> implements Store<T> {
@@ -37,20 +37,6 @@ export class LRUStore<T> implements Store<T> {
       keys.push(key);
     }
     return keys;
-  }
-}
-
-export class KeyvLRU<T> extends Keyv<T, { store: LRUStore<T> }> {
-  constructor(opts?: Options<T> & { store: LRUStore<T> }) {
-    super({
-      namespace: 'apollo',
-      store: new LRUStore<T>({
-        // Create ~about~ a 30MiB cache by default. Configurable by providing
-        // your own `opts.store` to the `KeyvLRU` constructor.
-        maxSize: Math.pow(2, 20) * 30,
-      }),
-      ...opts,
-    });
   }
 }
 
