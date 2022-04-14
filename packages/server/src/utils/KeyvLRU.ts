@@ -15,8 +15,7 @@ export class LRUStore<T> implements Store<T> {
   }
 
   set(key: string, value: T, ttl?: number) {
-    const result = this.cache.set(key, value, { ttl });
-    return result;
+    return this.cache.set(key, value, { ttl });
   }
 
   get(key: string) {
