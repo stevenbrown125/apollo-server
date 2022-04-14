@@ -21,7 +21,7 @@ import {
   LRUStore,
   PrefixingKeyv,
 } from './utils/KeyvLRU';
-import type Keyv from 'keyv';
+import Keyv from 'keyv';
 import type {
   ApolloServerPlugin,
   GraphQLServiceContext,
@@ -270,7 +270,15 @@ export class ApolloServer<TContext extends BaseContext = BaseContext> {
         };
 
     const introspectionEnabled = config.introspection ?? isDev;
-    const cache = config.cache ?? new KeyvLRU();
+
+    // The default internal cache is a vanilla `Keyv` which uses a `Map` by
+    // default for its underlying store. For production, we recommend using a
+    // more appropriate Keyv implementation (see
+    // https://github.com/jaredwray/keyv/tree/main/packages for 1st party
+    // maintained Keyv packages or our own `KeyvLRU`).
+    // TODO(AS4): warn users and provide better documentation around providing
+    // an appropriate Keyv.
+    const cache = config.cache ?? new Keyv();
 
     // Note that we avoid calling methods on `this` before `this.internals` is assigned
     // (thus a bunch of things being static methods above).
